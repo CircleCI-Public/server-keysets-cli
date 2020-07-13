@@ -1,0 +1,96 @@
+version: "2.1"
+
+workflows:
+  test-and-build:
+    jobs:
+      - test
+      - build
+
+executors:
+  lein:
+    docker:
+      - image: circleci/clojure:openjdk-8-lein-2.9.3
+
+commands:
+  restore-cache:
+    steps:
+      - restore_cache:
+          keys:
+            - v1-m2-{{ checksum "project.clj" }}
+            - v1-m2-
+  save-cache:
+    steps:
+      - save_cache:
+          key: v1-m2-{{ checksum "project.clj" }}
+          paths:
+            - ~/.m2
+  cache-graalvm-tools:
+    steps:
+      - save_cache:
+          key: graalvm-ce-20.1
+          paths:
+            - ~/graalvm
+  restore-graalvm-tools:
+    steps:
+      - restore_cache:
+          keys:
+            - graalvm-ce-20.1
+  install-graalvm-tools:
+    steps:
+      - run: |
+          cd $HOME
+          if [ -d graalvm ]; then
+            echo "graalvm tools already installed"
+            exit 0
+          fi
+
+          echo "installing graalvm tools"
+          curl --location --remote-name https://github.com/graalvm/graalvm-ce-builds/releases/download/vm-20.1.0/graalvm-ce-java8-linux-amd64-20.1.0.tar.gz
+          if (echo "4fac212b37cd548831fd6587dd4d59dc068068815aa20323b47fde9529d6bb6e  graalvm-ce-java8-linux-amd64-20.1.0.tar.gz" | sha256sum -c); then
+            tar xzf graalvm-ce-java8-linux-amd64-20.1.0.tar.gz
+            mv graalvm-ce-java8-20.1.0 graalvm
+          else
+            echo "Failed shasum check"
+            exit 1
+          fi
+      - run: echo "export PATH=${PATH}:${HOME}/graalvm/bin" >> ${BASH_ENV}
+      - run: gu install native-image
+      - run:
+          name: Update ld.so.conf
+          command: |
+            echo "$HOME/graalvm/jre/lib/amd64" | sudo tee /etc/ld.so.conf.d/graalvm.conf
+            sudo ldconfig
+
+jobs:
+  test:
+    executor: lein
+    environment:
+      CIRCLE_PIPELINE_NUMBER: << pipeline.number >>
+    steps:
+      - checkout
+      - restore-cache
+      - run: lein deps
+      - save-cache
+      - run: lein test
+
+  build:
+    executor: lein
+    environment:
+      CIRCLE_PIPELINE_NUMBER: << pipeline.number >>
+      JAVA_HOME: ~/graalvm
+    steps:
+      - checkout
+      - restore-cache
+      - restore-graalvm-tools
+      - install-graalvm-tools
+      - cache-graalvm-tools
+      - run:
+          name: Install gcc
+          command: |
+            sudo apt-get update
+            sudo apt-get install -y gcc zlib1g-dev
+      - run: lein uberjar
+      - run: lein generate-assisted-configuration
+      - run: lein native
+      - store_artifacts:
+          path: target/server-keysets

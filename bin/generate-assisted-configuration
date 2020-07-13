@@ -1,0 +1,47 @@
+#!/bin/bash
+#
+# GraalVM native images are built ahead of time and depend on static analysis
+# of which code is reachable. Java provides a number of mechanisms which defer
+# decisions about which code to execute until runtime: JNI, reflection, dynamic
+# proxy objects, and classpath resources.
+#
+# `native-image` needs to be made aware of these so that it can take them into
+# account.
+#
+# The configuration files are quite opaque looking, fortunately GraalVM also
+# provides a JVM TI agent which can generate these configuration files by
+# tracking the execution of running code -
+# https://github.com/oracle/graal/blob/master/substratevm/CONFIGURE.md
+#
+# Since the Server keyset generation code is very small, we can exercise all
+# the options quickly and generate the configuration files `native-image`
+# needs.
+#
+# This script is invoked with the path to the program uberjar. It calls all the
+# commands to generate keysets and then adds the generated `native-image`
+# configuration files to the uberjar.
+# The modified uberjar can then be given to `native-image` to compile to native
+# code.
+
+
+JAR_NAME="${1}"
+if [ -z "${JAR_NAME}" ]; then
+  echo "usage: $0 <path-to-jar>"
+  exit 1
+fi
+
+META_DIR="META-INF/native-image"
+mkdir -p ${META_DIR}
+
+for _command in "generate signing" "generate encryption"; do
+  echo "Exercising: ${_command}"
+  java \
+    "-agentlib:native-image-agent=config-merge-dir=${META_DIR}" \
+    -jar "${JAR_NAME}" \
+    ${_command}
+done
+
+echo "Adding native-image configuration from ${META_DIR} to ${JAR_NAME}"
+jar uf "${JAR_NAME}" "${META_DIR}"/*
+
+echo "Assisted configuration generation complete"

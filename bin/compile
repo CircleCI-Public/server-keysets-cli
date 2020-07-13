@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# Compile an uberjar into a native binary.
+
+JAR_NAME="${1}"
+if [ -z "${JAR_NAME}" ]; then
+  echo "usage: $0 <path-to-jar> <output-path-for-binary>"
+  exit 1
+fi
+
+BINARY_NAME="${2}"
+if [ -z "${BINARY_NAME}" ]; then
+  echo "usage: $0 <path-to-jar> <output-path-for-binary>"
+  exit 1
+fi
+
+native-image \
+  --report-unsupported-elements-at-runtime \
+  --initialize-at-build-time \
+  -jar "${JAR_NAME}" \
+  -H:Name="${BINARY_NAME}"
