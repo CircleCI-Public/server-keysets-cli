@@ -1,9 +1,10 @@
 (ns server-keysets.core
-  (:require [clojure.string :as string]
+  (:require [clojure.stacktrace :refer (print-stack-trace)]
+            [clojure.string :as string]
             [clj-keyczar.keyset :as keyset])
   (:gen-class))
 
-(defn generate
+(defn- generate
   [keyset-name purpose]
   (-> (keyset/create purpose)
       (keyset/addkey)
@@ -35,19 +36,20 @@
                       :output (pr-str (generate "encryption" :crypt))}
                      (catch Exception e
                        {:ok? false
-                        :output (with-out-str (.printStackTrace e))}))
+                        :output (with-out-str (print-stack-trace e))}))
       "signing" (try
                   {:ok? true
                    :output (pr-str (generate "signing" :sign))}
                   (catch Exception e
                     {:ok? false
-                     :output (with-out-str (.printStackTrace e))}))
+                     :output (with-out-str (print-stack-trace e))}))
       {:ok? false
        :output program-help})))
 
 (defn- exit
   [status message]
-  (println message)
+  (binding [*out* *err*]
+    (println message))
   (System/exit status))
 
 (defn -main
