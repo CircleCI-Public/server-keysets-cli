@@ -10,14 +10,24 @@
              (get-in k [:meta "name"])))
       (is (= "DECRYPT_AND_ENCRYPT"
              (get-in k [:meta "purpose"])))
-      (is (= 1 (count (:keys k))))))
+      (is (= 1 (count (:keys k))))
+
+      (testing "generates different keysets"
+        (let [new-k (#'keysets/generate "my-encryption-keyset" :crypt)]
+          (is (= (:meta k) (:meta new-k)))
+          (is (not= (:keys k) (:keys new-k)))))))
   (testing "signing"
     (let [k (#'keysets/generate "my-signing-keyset" :sign)]
       (is (= "my-signing-keyset"
              (get-in k [:meta "name"])))
       (is (= "SIGN_AND_VERIFY"
              (get-in k [:meta "purpose"])))
-      (is (= 1 (count (:keys k)))))))
+      (is (= 1 (count (:keys k))))
+
+      (testing "generates different keysets"
+        (let [new-k (#'keysets/generate "my-signing-keyset" :sign)]
+          (is (= (:meta k) (:meta new-k)))
+          (is (not= (:keys k) (:keys new-k))))))))
 
 (deftest handle-generate
   (testing "successful"
