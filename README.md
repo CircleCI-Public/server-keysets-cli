@@ -38,3 +38,10 @@ This CLI tool is built using [GraalVM's](https://www.graalvm.org/) `native-image
    script runs the program with a JVMTI agent attached that records these uses,
    generates the necessary configuration files, and adds them to the uberjar.
 1. `lein native` - invokes `native-image` to build the binary
+
+### Using the docker container
+`circleci/server-keysets` is a docker image with the generated binary already installed.
+
+Usage is the same as above, for example:
+  * `docker run circleci/server-keysets generate encryption`
+  * `docker run circleci/server-keysets generate signing`

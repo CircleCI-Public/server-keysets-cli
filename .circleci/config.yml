@@ -5,6 +5,13 @@ workflows:
     jobs:
       - test
       - build
+      - publish:
+          context: org-global
+          requires: 
+            - build
+          filters:
+            branches:
+              only: master
 
 executors:
   lein:
@@ -94,3 +101,29 @@ jobs:
       - run: lein native
       - store_artifacts:
           path: target/server-keysets
+      - persist_to_workspace:
+          root: target
+          paths:
+            - server-keysets
+
+  publish:
+    docker: 
+      - image: cimg/python:3.8
+    environment:
+      CIRCLE_PIPELINE_NUMBER: << pipeline.number >>
+    steps:
+      - checkout
+      - attach_workspace:
+          at: target
+      - setup_remote_docker
+      - run:
+          name: build docker
+          command: |
+            docker build . -t circleci/server-keysets:latest
+            docker tag circleci/server-keysets:latest circleci/server-keysets:v1.0-${CIRCLE_PIPELINE_NUMBER}-$(git rev-parse --short HEAD)
+      - run: docker login -u "${DOCKER_HUB_USER}" -p "${DOCKER_HUB_PASSWORD}"
+      - run:
+          name: publish docker container
+          command: |
+            docker push circleci/server-keysets:latest
+            docker push circleci/server-keysets:v1.0-${CIRCLE_PIPELINE_NUMBER}-$(git rev-parse --short HEAD)
