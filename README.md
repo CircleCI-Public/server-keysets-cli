@@ -1,6 +1,9 @@
 # CircleCI Server Keyset CLI
 
-`server-keysets` is a CLI tool to generate new encryption and signing keysets for use in CircleCI Server installs.
+`server-keysets` is a CLI tool to generate encryption and signing keysets for
+use in CircleCI Server installs.
+This is support tooling that is only useful if you are setting up or managing a
+CircleCI Server 3 install, and shouldn't be used as the basis for new projects.
 
 ## Usage:
 `server-keysets <command> <command-arguments>`
