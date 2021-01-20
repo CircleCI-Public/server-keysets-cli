@@ -23,11 +23,11 @@ Examples:
 This CLI tool is built using [GraalVM's](https://www.graalvm.org/) `native-image` compiler.
 
 ### Prerequisites
-* [Install GraalVM](https://www.graalvm.org/getting-started/). There is a
+* [Install GraalVM](https://www.graalvm.org/docs/getting-started/). There is a
   non-official [Homebrew cask](https://github.com/DeLaGuardo/homebrew-graalvm)
   available for macOS (at the time of writing this cask was confirmed to be a
   graalvm installer by inspection, it is worth confirming before installing).
-* Install the [native-image](https://www.graalvm.org/getting-started/#native-images) plugin
+* Install the [native-image](https://www.graalvm.org/docs/getting-started/#native-images) plugin
 * You will also need a compiler toolchain if you do not have one already
   installed. XCode for macOS should be sufficient, similary `gcc` for Linux.
 
