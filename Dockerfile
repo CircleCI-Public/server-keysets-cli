@@ -1,5 +1,6 @@
 FROM ubuntu:20.04
 
-COPY target/server-keysets /usr/local/bin
+COPY target/server-keysets generate_password.sh /usr/local/bin/
 
-ENTRYPOINT [ "server-keysets" ]
+ENTRYPOINT [ "/bin/bash" ]
+CMD [ "generate_password.sh" ]
