@@ -110,12 +110,12 @@ jobs:
                   echo "→ No project.clj found, skipping"
                   exit 0
                 fi
-                echo "CIRCLE_BRANCH= |$CIRCLE_BRANCH|"
-                echo "BASE_BRANCH  = |$BASE_BRANCH|"
+                echo "→ Debugging environment variables"
+                echo "CIRCLE_BRANCH value = |$CIRCLE_BRANCH|"
+                echo "BASE_BRANCH value   = |$BASE_BRANCH|"
                 CIRCLE_BRANCH=master
-                echo "CIRCLE_BRANCH= |$CIRCLE_BRANCH|"
-
-                [[ "$CIRCLE_BRANCH" == "$BASE_BRANCH" ]] && echo "Equal" || echo "Not equal"
+                echo "CIRCLE_BRANCH value = |$CIRCLE_BRANCH|"
+                [[ "$CIRCLE_BRANCH" == "$BASE_BRANCH" ]] && echo "Branch & Base Equal" || echo "Branch & Base Not equal"
 
                 if [[ "$CIRCLE_BRANCH" == "$BASE_BRANCH" ]]; then
                     echo "→ Running Snyk CLI against $BASE_BRANCH and uploading results"
