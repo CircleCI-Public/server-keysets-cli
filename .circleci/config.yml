@@ -6,7 +6,7 @@ workflows:
       - test
       - build
       - publish:
-          context: cimg-docker-image-publishing
+          context: server-keyset
           requires:
             - build
           filters:
@@ -164,7 +164,7 @@ jobs:
           command: |
             docker build . -t circleci/server-keysets:latest
             docker tag circleci/server-keysets:latest circleci/server-keysets:v1.0-${CIRCLE_PIPELINE_NUMBER}-$(git rev-parse --short HEAD)
-      - run: docker login -u "${DOCKER_USER}" -p "${DOCKER_TOKEN}"
+      - run: docker login -u "${DOCKER_USER}" -p "${DOCKER_PASSWORD}"
       - run:
           name: publish docker container
           command: |
