@@ -4,7 +4,7 @@
   :description "CLI wrapper for circleci/clj-keyczar"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
-  :dependencies [[org.clojure/clojure "1.10.1"]
+  :dependencies [[org.clojure/clojure "1.11.2"]
                  [circleci/clj-keyczar "0.1.3"]]
   :jvm-opts ["-XX:-OmitStackTraceInFastThrow"]
   :main server-keysets.core
